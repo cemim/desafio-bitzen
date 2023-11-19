@@ -20,3 +20,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::resource('/v1/partners', ControllerPartnerCompany::class);
+Route::put('/v1/restore-inative-cnpj/{partner}', [ControllerPartnerCompany::class, 'restore']);
+Route::get('/v1/search-razao-social/{razaoSocial}', [ControllerPartnerCompany::class, 'searchRazaoSocial']);

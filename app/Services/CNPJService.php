@@ -26,7 +26,7 @@ class CNPJService
                 return $response->getStatusCode();
             }
         } catch (\Exception $e) {
-            return 'CNPJ Não Localizado';
+            return array('status'=>0,'msg'=>'Não localizado');
         }
     }
 }
