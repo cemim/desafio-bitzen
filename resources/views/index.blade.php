@@ -31,7 +31,7 @@
                 <h2>Cadastrar/Editar </h2>
             </div>
             <div>
-                <form action="" class="form-horizontal" id="formPartner">
+                <form class="form-horizontal" id="formPartner">
                     <input type="hidden" id="id" name="id">
                     <div class="input-group">
                         <div>
@@ -70,12 +70,12 @@
                                 placeholder="Nome Responsável">
                         </div>
                     </div>
-                    <div class="input-group">
-                        <div>
-                            <button type="submit" onclick="submitForm(this);" class="btn btn-primary">Salvar</button>
-                        </div>
-                    </div>
                 </form>
+                <div class="input-group">
+                    <div>
+                        <button onclick="submitForm(this);" class="btn btn-primary">Salvar</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -89,10 +89,40 @@
             }
         });
 
+        document.addEventListener("DOMContentLoaded", function() {
+            const inputCNPJ = document.getElementById('cnpj');
+
+            inputCNPJ.addEventListener("input", function() {
+                let value = inputCNPJ.value.replace(/\D/g, ''); // Remove tudo que não for dígito
+                if (value.length > 14) {
+                    value = value.slice(0, 14); // Limita a 14 dígitos (tamanho máximo do CNPJ)
+                }
+
+                value = value.replace(/^(\d{2})(\d)/, '$1.$2'); // Adiciona o primeiro ponto
+                value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3'); // Adiciona o segundo ponto
+                value = value.replace(/\.(\d{3})(\d)/, '.$1/$2'); // Adiciona a barra
+                value = value.replace(/(\d{4})(\d)/, '$1-$2'); // Adiciona o hífen
+
+                inputCNPJ.value = value;
+            });
+        });
+
         // Page Load
         $(function() {
             loadTable();
         });
+
+        function checkFields() {
+            var inputs = document.getElementsByClassName('form-control');
+
+            for(let i=0; i<inputs.length;i++){
+                if(inputs[i].value == ''){                    
+                    return true;
+                }                
+            }
+
+            return false;
+        }
 
         function loadTable() {
             $.getJSON('/api/v1/partners', function(partners) {
@@ -134,6 +164,13 @@
         }
 
         function submitForm(btn) {
+            let check = checkFields();
+
+            if(check === true){
+                alert('Preencha todos os valores!');
+                return 0;
+            }
+
             if ($('#id').val() != '') {
                 editarPartner(btn);
             } else {
@@ -150,13 +187,22 @@
             let dadosForm = getDataForm('formPartner');
 
             $.post('/api/v1/partners', dadosForm, function(data) {
+                    console.log(data);
                     console.log('Done');
                 })
                 .done(function(data) {
-                    partnerSucess(data, btn);
+                    if(data.status !== 'undefined' && data.status === 0){
+                        alert(data.msg);
+                        partnerError(data, btn);
+                    } else {
+                        partnerSucess(data, btn);
+                    }
                 })
-                .fail(function(jqXHR, textStatus, errorThrown, data) {
-                    partnerError(data, btn);
+                .fail(function(responseData, textStatus, errorThrown) {
+                    console.log(responseData);
+                    console.log(textStatus);
+                    console.log(errorThrown);                    
+                    partnerError(textStatus, btn);
                 });
         }
 
@@ -174,12 +220,20 @@
                 context: this,
                 data: dadosForm,
                 success: function(data) {
+                    console.log(data);
                     console.log('Sucess Edit');
-                    partnerSucess(data, btn);
+                    if(data.status !== 'undefined' && data.status === 0){
+                        alert(data.msg);
+                        partnerError(data, btn);
+                    } else {
+                        partnerSucess(data, btn);
+                    }                    
                 },
-                error: function(error, data) {
-                    console.log(error);
-                    partnerError(data, btn);
+                error: function(responseData, textStatus, errorThrown) {
+                    console.log(responseData);
+                    console.log(textStatus);
+                    console.log(errorThrown); 
+                    partnerError(textStatus, btn);
                 }
             });
         }
@@ -222,7 +276,7 @@
             }
         }
 
-        function partnerError(data, btn) {
+        function partnerError(erroStatus, btn) {
             $(btn).attr('disabled', false);
             btn.innerHTML = 'Salvar';
             console.log('Ocorreu um erro no cadastro!');

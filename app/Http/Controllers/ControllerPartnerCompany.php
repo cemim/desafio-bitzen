@@ -45,7 +45,7 @@ class ControllerPartnerCompany extends Controller
             return response()->json($partner, 200);
         }
 
-        return response()->json($isValid, 400);                
+        return response()->json($isValid, 200);                
     }
 
     /**
@@ -83,7 +83,7 @@ class ControllerPartnerCompany extends Controller
             return response()->json($partner, 200);
         }
 
-        return response()->json($isValid, 400);  
+        return response()->json($isValid, 200);  
     }
 
     /**
@@ -121,7 +121,7 @@ class ControllerPartnerCompany extends Controller
 
         $partner->razao_social = $request->input("razao_social");
         $partner->nome_fantasia = $request->input("nome_fantasia");
-        $partner->cnpj = $request->input("cnpj");
+        $partner->cnpj = preg_replace('/[^0-9]/', '', $request->input("cnpj"));
         $partner->dt_fundacao = $request->input("dt_fundacao");
         $partner->email_responsavel = $request->input("email_responsavel");
         $partner->nome_responsavel = $request->input("nome_responsavel");
