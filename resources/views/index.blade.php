@@ -129,10 +129,6 @@
             document.getElementById('edit').style.display = 'none';
         }
 
-        function edit(id) {
-
-        }
-
         function clearModal() {
             $('#formPartner input').val("");
         }
